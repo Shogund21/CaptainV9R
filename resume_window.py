@@ -121,11 +121,21 @@ class ResumeWindow:
             tailoring_chain = LLMChain(llm=self.llm, prompt=tailoring_prompt)
             tailored_resume = tailoring_chain.run(resume=content, job_description=job_description)
 
-            self.resume_text.delete("1.0", tk.END)
-            self.resume_text.insert(tk.END, tailored_resume.strip())
-            messagebox.showinfo("Success", "Resume has been tailored to the job description.")
+            self.show_tailored_resume(tailored_resume)
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred while tailoring the resume: {str(e)}")
+
+    def show_tailored_resume(self, tailored_resume):
+        tailored_window = tk.Toplevel(self.window)
+        tailored_window.title("Tailored Resume")
+        tailored_window.geometry("600x400")
+
+        tailored_text = scrolledtext.ScrolledText(tailored_window, wrap=tk.WORD, width=70, height=20)
+        tailored_text.pack(padx=10, pady=10, expand=True, fill=tk.BOTH)
+        tailored_text.insert(tk.END, tailored_resume)
+
+        close_button = ttk.Button(tailored_window, text="Close", command=tailored_window.destroy)
+        close_button.pack(pady=10)
 
     def show_analysis(self, analysis):
         analysis_window = tk.Toplevel(self.window)

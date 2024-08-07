@@ -5,13 +5,11 @@ class VoyageLogView:
     def __init__(self, parent, shared_memory):
         self.frame = ttk.Frame(parent)
         self.shared_memory = shared_memory
-        self.applications = []  # List to store job applications
+        self.applications = []
         self.status_options = ["Applied", "Under Review", "Interview Scheduled", "Offer Received"]
-
         self.create_widgets()
 
     def create_widgets(self):
-        # Job Applications List
         self.tree = ttk.Treeview(self.frame, columns=('Company', 'Position', 'Date Applied', 'Status'), show='headings')
         self.tree.heading('Company', text='Company')
         self.tree.heading('Position', text='Position')
@@ -19,12 +17,10 @@ class VoyageLogView:
         self.tree.heading('Status', text='Status')
         self.tree.grid(row=0, column=0, columnspan=4, padx=10, pady=10, sticky='nsew')
 
-        # Scrollbar for the treeview
         scrollbar = ttk.Scrollbar(self.frame, orient=tk.VERTICAL, command=self.tree.yview)
         scrollbar.grid(row=0, column=4, sticky='ns')
         self.tree.configure(yscrollcommand=scrollbar.set)
 
-        # Buttons
         add_button = ttk.Button(self.frame, text='Add Application', command=self.add_application)
         add_button.grid(row=1, column=0, padx=5, pady=5)
 
@@ -37,11 +33,7 @@ class VoyageLogView:
         view_button = ttk.Button(self.frame, text='View Details', command=self.view_details)
         view_button.grid(row=1, column=3, padx=5, pady=5)
 
-        # Configure grid weights
-        self.frame.grid_columnconfigure(0, weight=1)
-        self.frame.grid_columnconfigure(1, weight=1)
-        self.frame.grid_columnconfigure(2, weight=1)
-        self.frame.grid_columnconfigure(3, weight=1)
+        self.frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.frame.grid_rowconfigure(0, weight=1)
 
     def add_application(self):
@@ -53,7 +45,7 @@ class VoyageLogView:
                 if date:
                     status = self.get_status()
                     if status:
-                        job_id = f"{company}_{position}_{date}"  # Create a unique job ID
+                        job_id = f"{company}_{position}_{date}"
                         job_description = simpledialog.askstring("Input", "Enter job description:")
                         if job_description:
                             self.shared_memory.add_job_description(job_id, job_description)
@@ -76,7 +68,6 @@ class VoyageLogView:
                                                       self.tree.item(selected_item)['values'][1],
                                                       self.tree.item(selected_item)['values'][2],
                                                       new_status))
-                # Update the status in the applications list
                 index = self.tree.index(selected_item)
                 self.applications[index]['status'] = new_status
                 self.shared_memory.log_action(f"Updated status for {self.applications[index]['position']} at {self.applications[index]['company']} to {new_status}")
@@ -107,7 +98,7 @@ class VoyageLogView:
         status_window = tk.Toplevel(self.frame)
         status_window.title("Select Status")
         status_var = tk.StringVar(status_window)
-        status_var.set(self.status_options[0])  # Set default value
+        status_var.set(self.status_options[0])
 
         for status in self.status_options:
             rb = ttk.Radiobutton(status_window, text=status, variable=status_var, value=status)
@@ -119,5 +110,8 @@ class VoyageLogView:
         ok_button = ttk.Button(status_window, text="OK", command=on_ok)
         ok_button.pack(pady=10)
 
-        status_window.wait_window()  # Wait for the window to be closed
+        status_window.wait_window()
         return status_var.get()
+
+    def display_message(self, message):
+        messagebox.showinfo("Captain AI", message)
